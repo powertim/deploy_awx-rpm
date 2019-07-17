@@ -1,0 +1,22 @@
+---
+  - name: Set the HA RabbitMQ policy
+    shell: |
+      rabbitmq-plugins enable rabbitmq_management
+      rabbitmqctl set_policy ha-all "" '{"ha-mode":"all","ha-sync-mode":"automatic"}'
+
+  - name: Restart RabbitMQ service
+    systemd:
+      state: restarted
+      daemon_reload: yes
+      name: rabbitmq-server
+
+  - name: Restart dispatcher service
+    systemd:
+      state: restarted
+      daemon_reload: yes
+      name: awx-dispatcher
+
+  - name: Register instances for AWX cluster
+    become: true
+    become_user: awx
+    shell: scl enable rh-python36 rh-postgresql10 "awx-manage provision_instance --hostname=$(hostname)"

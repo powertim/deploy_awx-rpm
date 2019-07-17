@@ -1,0 +1,6 @@
+---
+awx_repo: awx_ansible_awx_repo
+awx_dependencies_repo: awx_ansible-awx_dependencies
+rabbitmq_repo: rabbitMQ_rabbitmq-repo
+erlang_repo: rabbitMQ_erlang21-repo
+epel_repo: rhel_7_epel_-_rhel_7_repository

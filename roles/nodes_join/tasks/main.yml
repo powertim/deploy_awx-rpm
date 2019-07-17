@@ -1,0 +1,32 @@
+---
+  - name: Restart RabbitMQ service
+    systemd:
+      state: restarted
+      daemon_reload: yes
+      name: rabbitmq-server
+
+  - name: Stop RabbitMQ app
+    shell: rabbitmqctl stop_app
+
+  - name: Change the value of the Erlang cookie from first AWX node
+    copy:
+      content: "{{ hostvars[item]['cookie']['stdout'] }}"
+      dest: /var/lib/rabbitmq/.erlang.cookie
+    with_items: "{{ groups['nodes'][0] }}"
+
+  - name: Restart RabbitMQ service
+    systemd:
+      state: restarted
+      daemon_reload: yes
+      name: rabbitmq-server
+
+  - name: Start RabbitMQ app
+    shell: rabbitmqctl start_app
+
+  - name: Create RabbitMQ cluster
+    shell: |
+      rabbitmqctl stop_app
+      rabbitmqctl join_cluster rabbit@"{{ groups['nodes'][0] }}"
+
+  - name: Start RabbitMQ app
+    shell: rabbitmqctl start_app

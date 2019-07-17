@@ -1,0 +1,122 @@
+---
+- hosts: db
+  gather_facts: true
+  become: true
+  tasks:
+  - name: Check if db exists
+    include_role:
+      name: check_db
+    tags:
+      - checkdb
+
+- hosts: nodes
+  gather_facts: true
+  become: true
+  tasks:
+  - name: Check if already installed
+    include_role:
+      name: check_install
+    tags:
+      - checkinstall
+
+- hosts: all
+  tasks:
+  - name: Get pre check value and compute total
+    set_fact: total="{{ ( groups['nodes'] | map('extract', hostvars, ['precheck', 'matched']) | sum() ) + ((hostvars[item].precheck.stdout) | int )}}"
+    with_items: "{{ groups['db'][0] }}"
+
+  - name: Manual - Pause when AWX is already installed
+    pause: 
+      prompt: "     <<<<< AWX is already installed. Do you want to overwrite existing installation ? (yes / no) >>>>>"
+      echo: yes
+    register: choice
+    delegate_to: localhost
+    when: total !="0"
+
+  - name: Register choice to all hosts
+    set_fact:
+      user_choice: "{{ hostvars[item].choice.user_input }}"
+    with_items: "{{ groups['all'][0] }}"
+    when: total !="0"
+
+# Start operations on DB servers
+- hosts: db
+  gather_facts: true
+  become: true
+  tasks:
+
+  - name: Install prerequisites, PostgreSQL and prepare DB storage
+    include_role:
+      name: db_prereqs
+    tags:
+      - dbprereqs
+    when: (hostvars[inventory_hostname].user_choice is not defined) or (hostvars[inventory_hostname].user_choice | bool)
+
+  - name: Initialize and configure DB
+    include_role:
+      name: db_init
+    tags: 
+      - dbinit
+    when: (hostvars[inventory_hostname].user_choice is not defined) or (hostvars[inventory_hostname].user_choice | bool)
+
+  - name: Create user & DB
+    include_role:
+      name: db_create
+    tags: 
+      - dbcreate
+    when: (hostvars[inventory_hostname].user_choice is not defined) or (hostvars[inventory_hostname].user_choice | bool)
+
+# Start operations on all AWX nodes
+- hosts: nodes
+  become: true
+  tasks:
+  - name: Install prerequisites on AWX nodes
+    include_role:
+      name: nodes_prereqs
+    tags: 
+      - nodesprereqs
+    when: (hostvars[inventory_hostname].user_choice is not defined) or (hostvars[inventory_hostname].user_choice | bool)
+
+# On first AWX node only:
+- hosts: nodes[0]
+  become: true
+  tasks:
+  - name: Initialize master node
+    include_role:
+      name: master_init
+    tags: 
+      - masterinit
+    when: (hostvars[inventory_hostname].user_choice is not defined) or (hostvars[inventory_hostname].user_choice | bool)
+
+# On remaining AWX nodes:
+- hosts: nodes[1:]
+  become: true
+  tasks:
+  - name: Join RabbitMQ cluster
+    include_role:
+      name: nodes_join
+    tags: 
+      - nodesjoin
+    when: (hostvars[inventory_hostname].user_choice is not defined) or (hostvars[inventory_hostname].user_choice | bool)
+
+# On all AWX nodes:
+- hosts: nodes
+  become: true
+  tasks:
+  - name: Setup RabbitMQ cluster & register instances in AWX
+    include_role:
+      name: nodes_cluster
+    tags: 
+      - nodescluster
+    when: (hostvars[inventory_hostname].user_choice is not defined) or (hostvars[inventory_hostname].user_choice | bool)
+
+# On first AWX node only:
+- hosts: nodes[0]
+  become: true
+  tasks:
+  - name: Add instances to tower instance group
+    include_role:
+      name: master_instance
+    tags: 
+      - masterinstance
+    when: (hostvars[inventory_hostname].user_choice is not defined) or (hostvars[inventory_hostname].user_choice | bool)

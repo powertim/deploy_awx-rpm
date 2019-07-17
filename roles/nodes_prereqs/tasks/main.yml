@@ -1,0 +1,118 @@
+---
+  - name: Activate Satellite repositories
+    rhsm_repository:
+      name: "{{ item }}"
+      state: enabled
+    with_items:
+      - rhel-7-server-extras-rpms
+      - rhel-server-rhscl-7-rpms
+      - rhel-7-server-optional-rpms
+      - "{{ awx_repo }}"
+      - "{{ epel_repo }}"
+      - "{{ awx_dependencies_repo }}"
+
+  - name: Install rh-python36-build
+    yum:
+      name: rh-python36-build
+      disable_gpg_check: yes
+      state: present
+
+  - name: Remove rh-python36-python-six
+    yum:
+      name: rh-python36-python-six
+      state: absent
+
+  - name: Install Ansible and tower-cli & other dependencies
+    yum:
+      name: "{{ packages }}"
+      state: present
+    vars:
+      packages:
+      - ansible
+      - ansible-tower-cli
+      - python-colorama
+      - rh-python36-python-wheel-0.30.0a0-1.el7.noarch
+      - rh-python36-Babel-2.6.0-1.noarch
+      - rh-python36-python-sqlalchemy-1.1.14-1.el7.x86_64
+      - rh-python36-python-six-1.11.0-1.el7.noarch
+      - rh-python36-python-psycopg2-2.7.3-1.el7.x86_64
+      - rh-python36-python-psycopg2-doc-2.7.3-1.el7.x86_64
+      - rh-python36*
+
+  - name: Install RabbitMQ
+    yum:
+      name: rabbitmq-server 
+      state: present
+
+  - name: Install Memcached
+    yum:
+      name: memcached 
+      state: present
+
+  - name: Install AWX
+    yum:
+      name: ansible-awx 
+      state: present
+  
+  - name: Start & enable RabbitMQ service at boot
+    service:
+      name: rabbitmq-server
+      state: started
+      enabled: yes
+
+  - name: Start & enable Memcached service at boot
+    service:
+      name: memcached
+      state: started
+      enabled: yes
+  
+  - name: Edit AWX configuration to connect to external DB
+    lineinfile: 
+      path: /etc/tower/settings.py
+      regexp: "{{ item.regexp }}"
+      line: "{{ item.line }}"
+      state: present
+    with_items:
+      - { regexp: "'NAME':", line: "        'NAME': 'awx'," }
+      - { regexp: "'USER':", line: "        'USER': 'awx'," }
+      - { regexp: "'HOST':", line: "        'HOST': '{{ groups['db'][0] }}'," }
+      - { regexp: "'PORT':", line: "        'PORT': '5432'," }
+      - { regexp: "'PASSWORD':", line: "        'PASSWORD': '{{ hostvars[groups['db'][0]]['password'] }}'," }
+
+  - name: Install NGINX
+    yum:
+      name: nginx 
+      state: present
+
+  - name: Add AWX configuration to NGINX
+    template:
+      src: nginx_awx.conf.j2
+      dest: /etc/nginx/nginx.conf
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: Start & enable NGINX service at boot
+    service:
+      name: nginx
+      state: started
+      enabled: yes
+
+  - name: Edit SELinux to permit AWX needed ports
+    seport:
+      ports: 8050-8052
+      proto: tcp
+      setype: http_port_t
+      state: present
+
+  - name: Start & enable AWX services
+    service:
+      name: "{{ item }}"
+      state: restarted
+      enabled: yes
+    with_items:
+      - 'awx-cbreceiver'
+      - 'awx-dispatcher'
+      - 'awx-channels-worker'
+      - 'awx-daphne'
+      - 'awx-web'

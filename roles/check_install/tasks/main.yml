@@ -1,0 +1,9 @@
+---
+  - name: Check AWX directory is empty
+    find:
+      paths: "/etc/tower"
+      patterns: "[A-Za-z0-9_-]+"
+      use_regex: True
+      file_type: any
+      recurse: yes
+    register: precheck

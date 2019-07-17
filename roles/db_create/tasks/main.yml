@@ -1,0 +1,22 @@
+---
+  - name: Create awx DB
+    become: true
+    become_user: postgres
+    postgresql_db:
+      name: awx
+
+  - name: Generate password for awx db user
+    set_fact:
+      password: "{{ lookup('password', '/dev/null length=24 chars=ascii_letters,digits') }}"
+    
+  - name : Display password for awx db user
+    debug:
+      msg: "Randomly generated password for awx db user is : {{ password }}"
+
+  - name: Create awx user for DB
+    become: true
+    become_user: postgres
+    postgresql_user:
+      db: awx
+      name: awx
+      password: "{{ password }}"

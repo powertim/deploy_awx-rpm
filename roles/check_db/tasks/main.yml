@@ -1,0 +1,6 @@
+---
+  - name: Check if PostgreSQL database already exists
+    become_user: postgres
+    become: true
+    shell: /opt/rh/rh-postgresql10/root/usr/bin/psql -lqt | cut -d \| -f 1 | grep -w awx | wc -l
+    register: precheck

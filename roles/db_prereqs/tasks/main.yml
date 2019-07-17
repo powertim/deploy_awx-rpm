@@ -1,0 +1,29 @@
+---
+  - name: Activate software collections
+    rhsm_repository:
+      name: rhel-server-rhscl-7-rpms
+      state: enabled
+
+  - name: Install PostgreSQL
+    yum:
+      name: rh-postgresql10
+      state: present
+
+  - name: Install python psycopg2 module
+    yum:
+      name: python-psycopg2
+      state: present
+
+  - name: Unmount DB data volume from default location
+    mount:
+      path: "{{ default_db_disk_mount }}"
+      src: "{{ db_disk_src }}"
+      fstype: "{{ db_disk_fs_type }}"
+      state: absent
+
+  - name: Mount /data volume to PostgreSQL directory
+    mount:
+      path: /var/lib/pgsql
+      src: "{{ db_disk_src }}"
+      fstype: "{{ db_disk_fs_type }}"
+      state: present

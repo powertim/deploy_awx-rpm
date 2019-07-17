@@ -1,0 +1,4 @@
+---
+default_db_disk_mount: /data
+db_disk_src: /dev/mapper/data-data
+db_disk_fs_type: xfs
