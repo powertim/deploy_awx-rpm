@@ -26,7 +26,7 @@
     with_items: "{{ groups['db'][0] }}"
 
   - name: Manual - Pause when AWX is already installed
-    pause: 
+    pause:
       prompt: "     <<<<< AWX is already installed. Do you want to overwrite existing installation ? (yes / no) >>>>>"
       echo: yes
     register: choice
@@ -55,14 +55,14 @@
   - name: Initialize and configure DB
     include_role:
       name: db_init
-    tags: 
+    tags:
       - dbinit
     when: (hostvars[inventory_hostname].user_choice is not defined) or (hostvars[inventory_hostname].user_choice | bool)
 
   - name: Create user & DB
     include_role:
       name: db_create
-    tags: 
+    tags:
       - dbcreate
     when: (hostvars[inventory_hostname].user_choice is not defined) or (hostvars[inventory_hostname].user_choice | bool)
 
@@ -73,7 +73,7 @@
   - name: Install prerequisites on AWX nodes
     include_role:
       name: nodes_prereqs
-    tags: 
+    tags:
       - nodesprereqs
     when: (hostvars[inventory_hostname].user_choice is not defined) or (hostvars[inventory_hostname].user_choice | bool)
 
@@ -84,7 +84,7 @@
   - name: Initialize master node
     include_role:
       name: master_init
-    tags: 
+    tags:
       - masterinit
     when: (hostvars[inventory_hostname].user_choice is not defined) or (hostvars[inventory_hostname].user_choice | bool)
 
@@ -95,7 +95,7 @@
   - name: Join RabbitMQ cluster
     include_role:
       name: nodes_join
-    tags: 
+    tags:
       - nodesjoin
     when: (hostvars[inventory_hostname].user_choice is not defined) or (hostvars[inventory_hostname].user_choice | bool)
 
@@ -106,7 +106,7 @@
   - name: Setup RabbitMQ cluster & register instances in AWX
     include_role:
       name: nodes_cluster
-    tags: 
+    tags:
       - nodescluster
     when: (hostvars[inventory_hostname].user_choice is not defined) or (hostvars[inventory_hostname].user_choice | bool)
 
@@ -117,6 +117,6 @@
   - name: Add instances to tower instance group
     include_role:
       name: master_instance
-    tags: 
+    tags:
       - masterinstance
     when: (hostvars[inventory_hostname].user_choice is not defined) or (hostvars[inventory_hostname].user_choice | bool)

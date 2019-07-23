@@ -2,4 +2,4 @@
   - name: Add instances to ‘tower’ instance group
     become: true
     become_user: awx
-    shell: scl enable rh-python36 rh-postgresql10 "awx-manage register_queue --queuename=tower --hostnames="{{ groups['nodes'] | join(',') }}"
+    shell: scl enable rh-python36 rh-postgresql10 'awx-manage register_queue --queuename=tower --hostnames="{{ groups['nodes'] | join(',') }}"'

@@ -1,6 +1,23 @@
 ---
+  - name: Check if postgres user exists
+    shell: /usr/bin/getent passwd postgres | /usr/bin/wc -l | tr -d ''
+    register: user_check
+
+  - debug:
+      var: user_check
+
   - name: Check if PostgreSQL database already exists
     become_user: postgres
     become: true
     shell: /opt/rh/rh-postgresql10/root/usr/bin/psql -lqt | cut -d \| -f 1 | grep -w awx | wc -l
-    register: precheck
+    register: db_check
+    when: user_check.stdout != "0"
+
+  - debug:
+      var: db_check
+
+  - set_fact: precheck="{{ user_check }}"
+    when: db_check.skipped is defined and db_check.skipped == true
+
+  - set_fact: precheck="{{ db_check }}"
+    when: user_check.stdout != "0"

@@ -21,25 +21,25 @@
       enabled: yes
 
   - name: Edit PostgreSQL configuration to trust AWX servers remote connections
-    lineinfile: 
-      path: /var/opt/rh/rh-postgresql10/lib/pgsql/data/pg_hba.conf 
+    lineinfile:
+      path: /var/opt/rh/rh-postgresql10/lib/pgsql/data/pg_hba.conf
       regexp: "^host    all             all             {{ hostvars[item]['ansible_default_ipv4']['address'] }}/32            trust$"
       insertafter: '# IPv4 local connections:'
       line: "host    all             all             {{ hostvars[item]['ansible_default_ipv4']['address'] }}/32            trust"
     with_items: "{{ groups['nodes'] }}"
 
   - name: Edit PostgreSQL configuration file to listen to all addresses
-    lineinfile: 
+    lineinfile:
       path: /var/opt/rh/rh-postgresql10/lib/pgsql/data/postgresql.conf
       regexp: '^listen_addresses'
-      line: "listen_addresses = '*'" 
+      line: "listen_addresses = '*'"
       state: present
 
   - name: Edit PostgreSQL configuration file to configure default port
-    lineinfile: 
+    lineinfile:
       path: /var/opt/rh/rh-postgresql10/lib/pgsql/data/postgresql.conf
       regexp: '^port'
-      line: "port = 5432" 
+      line: "port = 5432"
       state: present
 
   - name: Restart PostgreSQL service

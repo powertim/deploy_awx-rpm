@@ -8,7 +8,7 @@
   - name: Generate password for awx db user
     set_fact:
       password: "{{ lookup('password', '/dev/null length=24 chars=ascii_letters,digits') }}"
-    
+
   - name : Display password for awx db user
     debug:
       msg: "Randomly generated password for awx db user is : {{ password }}"

@@ -22,38 +22,24 @@
       name: rh-python36-python-six
       state: absent
 
-  - name: Install Ansible and tower-cli & other dependencies
-    yum:
-      name: "{{ packages }}"
-      state: present
-    vars:
-      packages:
-      - ansible
-      - ansible-tower-cli
-      - python-colorama
-      - rh-python36-python-wheel-0.30.0a0-1.el7.noarch
-      - rh-python36-Babel-2.6.0-1.noarch
-      - rh-python36-python-sqlalchemy-1.1.14-1.el7.x86_64
-      - rh-python36-python-six-1.11.0-1.el7.noarch
-      - rh-python36-python-psycopg2-2.7.3-1.el7.x86_64
-      - rh-python36-python-psycopg2-doc-2.7.3-1.el7.x86_64
-      - rh-python36*
+  - name: Install Ansible, tower-cli & other dependencies
+    shell: yum install -y -x "*-debuginfo, rh-python36-python-wheel-0.30.0a0-1.el7.noarch, rh-python36-Babel-2.6.0-1.noarch, rh-python36-python-sqlalchemy-1.1.14-1.el7.x86_64, rh-python36-python-six-1.11.0-1.el7.noarch, rh-python36-python-psycopg2-2.7.3-1.el7.x86_64, rh-python36-python-psycopg2-doc-2.7.3-1.el7.x86_64" "rh-python36*"
 
   - name: Install RabbitMQ
     yum:
-      name: rabbitmq-server 
+      name: rabbitmq-server
       state: present
 
   - name: Install Memcached
     yum:
-      name: memcached 
+      name: memcached
       state: present
 
   - name: Install AWX
     yum:
-      name: ansible-awx 
+      name: ansible-awx
       state: present
-  
+
   - name: Start & enable RabbitMQ service at boot
     service:
       name: rabbitmq-server
@@ -65,9 +51,9 @@
       name: memcached
       state: started
       enabled: yes
-  
+
   - name: Edit AWX configuration to connect to external DB
-    lineinfile: 
+    lineinfile:
       path: /etc/tower/settings.py
       regexp: "{{ item.regexp }}"
       line: "{{ item.line }}"
@@ -81,7 +67,7 @@
 
   - name: Install NGINX
     yum:
-      name: nginx 
+      name: nginx
       state: present
 
   - name: Add AWX configuration to NGINX
@@ -92,18 +78,18 @@
       group: root
       mode: 0644
 
-  - name: Start & enable NGINX service at boot
-    service:
-      name: nginx
-      state: started
-      enabled: yes
-
   - name: Edit SELinux to permit AWX needed ports
     seport:
       ports: 8050-8052
       proto: tcp
       setype: http_port_t
       state: present
+
+  - name: Start & enable NGINX service at boot
+    service:
+      name: nginx
+      state: started
+      enabled: yes
 
   - name: Start & enable AWX services
     service:

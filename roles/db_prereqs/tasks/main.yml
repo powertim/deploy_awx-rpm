@@ -1,8 +1,10 @@
 ---
-  - name: Activate software collections
+  - name: Activate Satellite repositories
     rhsm_repository:
-      name: rhel-server-rhscl-7-rpms
+      name: "{{ item }}"
       state: enabled
+    with_items:
+      - rhel-server-rhscl-7-rpms
 
   - name: Install PostgreSQL
     yum:

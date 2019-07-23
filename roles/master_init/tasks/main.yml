@@ -3,11 +3,12 @@
     become: true
     become_user: awx
     shell: scl enable rh-python36 rh-postgresql10 "awx-manage migrate"
+    ignore_errors: true
 
   - name: Generate password for AWX admin user
     set_fact:
       password: "{{ lookup('password', '/dev/null length=20 chars=ascii_letters,digits') }}"
-    
+
   - name : Display password for AWX admin user
     debug:
       msg: "Randomly generated password for AWX admin user is : {{ password }}"
@@ -17,13 +18,13 @@
     become_user: awx
     shell: |
       echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'root@localhost', '{{ password }}')" | scl enable rh-python36 rh-postgresql10 "awx-manage shell"
-      awx scl enable rh-python36 rh-postgresql10 "awx-manage create_preload_data"
-  
+      scl enable rh-python36 rh-postgresql10 "awx-manage create_preload_data"
+
   - name: Get value of Erlang cookie for RabbitMQ
     become: true
     shell: cat /var/lib/rabbitmq/.erlang.cookie
     register: cookie
-    
+
   - name: Display value of Erlang cookie for RabbitMQ
     debug:
       msg: "Erlang cookie for RabbitMQ value is : {{ cookie.stdout }}"
