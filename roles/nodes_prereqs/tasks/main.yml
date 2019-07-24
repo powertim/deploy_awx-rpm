@@ -22,8 +22,15 @@
       name: rh-python36-python-six
       state: absent
 
-  - name: Install Ansible, tower-cli & other dependencies
+  - name: Install Python dependencies
     shell: yum install -y -x "*-debuginfo, rh-python36-python-wheel-0.30.0a0-1.el7.noarch, rh-python36-Babel-2.6.0-1.noarch, rh-python36-python-sqlalchemy-1.1.14-1.el7.x86_64, rh-python36-python-six-1.11.0-1.el7.noarch, rh-python36-python-psycopg2-2.7.3-1.el7.x86_64, rh-python36-python-psycopg2-doc-2.7.3-1.el7.x86_64" "rh-python36*"
+  
+  - name: Install Ansible & tower-cli
+    yum:
+      name: 
+        - ansible 
+        - tower-cli
+      state:present
 
   - name: Install RabbitMQ
     yum:
