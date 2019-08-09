@@ -53,7 +53,7 @@ Main milestones are:
 - Supporting CentOS7 x86_64 (only tested on RHEL7 x86_64 now)
 - Improving idempotence
 
-Feel free to submit pull requests on `dev` branch and your ideas to improve this work.
+Feel free to submit pull requests on [dev](https://github.com/powertim/deploy_awx-rpm/tree/dev) branch and your ideas to improve this work.
 
 ## Reporting issues
 All issues can be submitted in the appropriate [section](https://github.com/powertim/deploy_awx-rpm/issues).
