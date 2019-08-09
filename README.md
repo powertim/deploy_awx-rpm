@@ -42,11 +42,16 @@ All variables are configurable at the [group_vars](https://github.com/powertim/d
 $ ansible-playbook -i inventory deploy_awx-rpm.yml
 ```
 
+## Known issues
+- Idempotence not fully working
+- Re-running the playbook can throw errors (most related to django)
+
 ## Contributing
 Any help is welcome !
 Main milestones are:
 - Adaptating for use without Satellite repositories
 - Supporting CentOS7 x86_64 (only tested on RHEL7 x86_64 now)
+- Improving idempotence
 
 Feel free to submit pull requests on `dev` branch and your ideas to improve this work.
 
