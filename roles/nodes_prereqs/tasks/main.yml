@@ -45,7 +45,7 @@
   - name: Install AWX
     yum:
       name: ansible-awx
-      state: present
+      state: latest
 
   - name: Start & enable RabbitMQ service at boot
     service:
