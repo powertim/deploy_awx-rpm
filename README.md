@@ -1,6 +1,10 @@
 # deploy_awx-rpm
 Deploy HA cluster for [AWX-RPM](https://github.com/MrMEEE/awx-build)
 
+<p align="center">
+  <img alt="AWX-RPM" src="https://awx.wiki/user/pages/01.blog/logo-updated/awx-rpm-logo.svg">
+</p>
+
 ## Summary
 This playbook is intended to configure a full stack of:
 - 1 or more external database server with PostgreSQL 10 (cluster configuration not implemented yet)
