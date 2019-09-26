@@ -30,7 +30,7 @@
       name: 
         - ansible 
         - tower-cli
-      state:present
+      state: present
 
   - name: Install RabbitMQ
     yum:
